@@ -1,15 +1,20 @@
 package main
 
-const G = 6.6743e-11
-const AU = 149.6e6
+import (
+	"fmt"
+	"os"
+)
 
-const time float64 = 3600
+const G = 6.6743e-11
+const AU = 149.6e6 * 1000
+
+const time float64 = 3600 * 24
 
 func initPlanets(system *SolarSystem) {
 	sun := Planet{"Sun", [3]float64{0, 0, 0}, 1.989e30, 696340, [3]float64{0, 0, 0}}
 	mercury := Planet{"Mercury", [3]float64{0.3 * AU, 0, 0}, 3.301e23, 2439, [3]float64{0, 50000, 0}}
 	venus := Planet{"Venus", [3]float64{0.7 * AU, 0, 0}, 4.867e24, 6051, [3]float64{0, 40000, 0}}
-	earth := Planet{"Earth", [3]float64{AU, 0, 0}, 6.046e24, 6371, [3]float64{0, 0, 30000}}
+	earth := Planet{"Earth", [3]float64{AU, 0, 0}, 6.046e24, 6371, [3]float64{0, 30000, 0}}
 	mars := Planet{"Mars", [3]float64{1.5 * AU, 0, 0}, 6.417e23, 3389, [3]float64{0, 25000, 0}}
 	jupiter := Planet{"Jupiter", [3]float64{2.5 * AU, 0, 0}, 1.899e27, 69911, [3]float64{0, 20000, 0}}
 	saturn := Planet{"Saturn", [3]float64{4 * AU, 0, 0}, 5.685e26, 58232, [3]float64{0, 15000, 0}}
@@ -30,10 +35,30 @@ func initPlanets(system *SolarSystem) {
 
 }
 
+func check(e error) {
+	if e != nil {
+		panic(e)
+	}
+}
 func main() {
 
 	system := SolarSystem{"Our solar system", []Planet{}}
 
 	initPlanets(&system)
+	f, err := os.Create("./out.csv")
+	check(err)
+	defer f.Close()
+
+	for i := 0; i < 400; i++ {
+		system.SunOnly()
+		//fmt.Print(system.objects[3].pos, "\n")
+
+		f.WriteString(fmt.Sprintf("%f", system.objects[3].pos[0]))
+		f.WriteString(",")
+
+		f.WriteString(fmt.Sprintf("%f", system.objects[3].pos[1]))
+		f.WriteString("\n")
+
+	}
 
 }

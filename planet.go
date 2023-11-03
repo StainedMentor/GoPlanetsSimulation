@@ -26,13 +26,20 @@ func (p *Planet) TimeStep(t float64) {
 
 }
 
-func (p1 Planet) Distance(p2 Planet) float64 {
+func (p1 Planet) Distance3D(p2 Planet) float64 {
 	return math.Sqrt(math.Pow(p1.pos[0]-p2.pos[0], 2) + math.Pow(p1.pos[1]-p2.pos[1], 2) + math.Pow(p1.pos[2]-p2.pos[2], 2))
 
 }
+
 func (p1 *Planet) Influence(p2 Planet) {
+
+	distance := p1.Distance3D(p2)
+
+	force := G * p2.m / math.Pow(distance, 2)
+
 	for i := 0; i < 3; i++ {
-		p1.vel[i] += G * p2.m / math.Pow(p2.pos[i]-p1.pos[i], 2)
+		f := force * (p2.pos[i] - p1.pos[i]) / distance
+		p1.vel[i] += f * time
 	}
 
 }
