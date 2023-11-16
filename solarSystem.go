@@ -14,3 +14,18 @@ func (system *SolarSystem) SunOnly() {
 	}
 
 }
+
+func (system *SolarSystem) UniverseStep() {
+	for p := 0; p < len(system.objects); p++ {
+
+		for i := 0; i < len(system.objects); i++ {
+			if i != p {
+				system.objects[p].Influence(system.objects[i])
+
+			}
+		}
+		system.objects[p].TimeStep(time)
+
+	}
+
+}

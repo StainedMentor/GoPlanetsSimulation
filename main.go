@@ -2,8 +2,14 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
+
+const SCREENWIDTH = 1800
+const SCREENHEIGHT = 1100
 
 const G = 6.6743e-11
 const AU = 149.6e6 * 1000
@@ -18,9 +24,9 @@ func initPlanets(system *SolarSystem) {
 	mars := Planet{"Mars", [3]float64{1.5 * AU, 0, 0}, 6.417e23, 3389, [3]float64{0, 25000, 0}}
 	jupiter := Planet{"Jupiter", [3]float64{2.5 * AU, 0, 0}, 1.899e27, 69911, [3]float64{0, 20000, 0}}
 	saturn := Planet{"Saturn", [3]float64{4 * AU, 0, 0}, 5.685e26, 58232, [3]float64{0, 15000, 0}}
-	uranus := Planet{"Uranus", [3]float64{6 * AU, 0, 0}, 8.682e25, 25362, [3]float64{0, 10000, 0}}
-	neptune := Planet{"Neptune", [3]float64{8 * AU, 0, 0}, 1.024e26, 24622, [3]float64{0, 5000, 0}}
-	pluto := Planet{"Pluto", [3]float64{10 * AU, 0, 0}, 1.471e22, 1188, [3]float64{0, 1000, 0}}
+	uranus := Planet{"Uranus", [3]float64{6 * AU, 0, 0}, 8.682e25, 25362, [3]float64{0, 11000, 0}}
+	neptune := Planet{"Neptune", [3]float64{8 * AU, 0, 0}, 1.024e26, 24622, [3]float64{0, 10000, 0}}
+	pluto := Planet{"Pluto", [3]float64{10 * AU, 0, 0}, 1.471e22, 1188, [3]float64{0, 10000, 0}}
 
 	system.objects = append(system.objects, sun)
 	system.objects = append(system.objects, mercury)
@@ -40,11 +46,7 @@ func check(e error) {
 		panic(e)
 	}
 }
-func main() {
-
-	system := SolarSystem{"Our solar system", []Planet{}}
-
-	initPlanets(&system)
+func testCSV(system *SolarSystem) {
 	f, err := os.Create("./out.csv")
 	check(err)
 	defer f.Close()
@@ -58,6 +60,57 @@ func main() {
 
 		f.WriteString(fmt.Sprintf("%f", system.objects[3].pos[1]))
 		f.WriteString("\n")
+
+	}
+}
+func main() {
+	g := &Game{}
+
+	system := SolarSystem{"Our solar system", []Planet{}}
+
+	initPlanets(&system)
+	g.system = &system
+
+	ebiten.SetWindowSize(SCREENWIDTH, SCREENHEIGHT)
+	ebiten.SetWindowTitle("Hello, World!")
+	ebiten.SetTPS(240)
+	if err := ebiten.RunGame(g); err != nil {
+		log.Fatal(err)
+	}
+
+}
+
+type Game struct {
+	system *SolarSystem
+	pixels []byte
+}
+
+func (g *Game) Update() error {
+	// g.system.SunOnly()
+	g.system.UniverseStep()
+
+	// go fmt.Print(ebiten.TPS())
+	return nil
+}
+
+func (g *Game) Draw(screen *ebiten.Image) {
+	if g.pixels == nil {
+		g.pixels = make([]byte, SCREENWIDTH*SCREENHEIGHT*4)
+	}
+	g.system.Draw(g.pixels)
+	screen.WritePixels(g.pixels)
+}
+
+func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
+	return SCREENWIDTH, SCREENHEIGHT
+}
+func (w *SolarSystem) Draw(pix []byte) {
+	for i := 0; i < len(w.objects); i++ {
+		x := int(w.objects[i].pos[0] * 50 / AU)
+		y := int(w.objects[i].pos[1] * 50 / AU)
+
+		pos := y*SCREENWIDTH + x + SCREENHEIGHT*SCREENWIDTH/2 + SCREENWIDTH/2
+		pix[pos*4] = 0xff
 
 	}
 
