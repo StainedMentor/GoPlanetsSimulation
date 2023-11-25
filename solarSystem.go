@@ -6,6 +6,7 @@ type SolarSystem struct {
 	objects []Planet
 }
 
+// Steps with only the sun influencing the planets
 func (system *SolarSystem) SunOnly() {
 
 	for i := 1; i < len(system.objects); i++ {
@@ -15,6 +16,7 @@ func (system *SolarSystem) SunOnly() {
 
 }
 
+// Step with each planet influencing every other planet
 func (system *SolarSystem) UniverseStep() {
 	for p := 0; p < len(system.objects); p++ {
 
@@ -24,8 +26,10 @@ func (system *SolarSystem) UniverseStep() {
 
 			}
 		}
-		system.objects[p].TimeStep(time)
 
+	}
+	for p := 0; p < len(system.objects); p++ {
+		system.objects[p].TimeStep(time)
 	}
 
 }
